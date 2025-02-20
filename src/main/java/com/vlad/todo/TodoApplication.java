@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class TodoApplication {
 
 	public static void main(String[] args) {
-		System.out.println("Hellow");
 		SpringApplication.run(TodoApplication.class, args);
 	}
 
