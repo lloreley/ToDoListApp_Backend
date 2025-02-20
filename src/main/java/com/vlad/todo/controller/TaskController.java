@@ -2,20 +2,49 @@ package com.vlad.todo.controller;
 
 
 import com.vlad.todo.model.Task;
-//import java.time.LocalDate;
+import com.vlad.todo.service.TaskService;
 import java.util.List;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping  ("/api/v1/tasks")
+@RequestMapping("/api/tasks")
 public class TaskController {
-    public List<Task> findAllTasks() {
-        return List.of(
-                new Task("Sleep")
-        );
+    @Autowired
+    private TaskService taskService;
+
+    @GetMapping
+    public List<Task> tasksByFilter(@RequestParam(required = false) Boolean completed) {
+        List<Task> filteredTasks = taskService.findAllTasks();
+        if (completed != null) {
+            filteredTasks = taskService.findAllTasks().stream()
+                            .filter(todo -> todo.getCompleted() == completed)
+                            .collect(Collectors.toList());
+        }
+        return filteredTasks;
+    }
+
+
+    @PostMapping("saveTask")
+    public Task saveTask(@RequestBody Task task) {
+        return taskService.saveTask(task);
+    }
+
+    @GetMapping("/{id}")
+    public Task findTaskById(@PathVariable int id) {
+        return taskService.findTaskById(id);
+    }
+
+    @DeleteMapping("deleteTask/{id}")
+    public void deleteTaskById(@PathVariable int id) {
+        taskService.deleteTaskById(id);
+    }
+
+    @PutMapping("updateTask")
+    public Task updateTaskById(Task task) {
+        return taskService.updateTask(task);
     }
 
 }

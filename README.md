@@ -22,7 +22,7 @@ ___
 ___
 ## Sonar
 
-something about sonar
+https://sonarcloud.io/summary/new_code?id=lloreley_ToDoList&branch=main
 ___
 ## Установка
 
