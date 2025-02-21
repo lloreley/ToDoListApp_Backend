@@ -36,7 +36,6 @@ public class TaskDaoImpl implements TaskService {
             }
         }
         return null;
-        // throw new RuntimeException("Task not found");
     }
 
     @Override
@@ -45,7 +44,6 @@ public class TaskDaoImpl implements TaskService {
         if (task != null) {
             tasks.remove(task);
         }
-        // throw new RuntimeException("Task not found");
     }
 }
 
