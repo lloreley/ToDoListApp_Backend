@@ -1,7 +1,7 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
-!**/src/test/*
+
 
 ### STS ###
 .apt_generated
@@ -19,3 +19,4 @@ target/
 *.ipr
 
 checkstyle.xml
+/src/test
