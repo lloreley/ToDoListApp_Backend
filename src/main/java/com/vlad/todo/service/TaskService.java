@@ -1,81 +1,83 @@
 package com.vlad.todo.service;
 
-
-import com.vlad.todo.dto.TaskDto;
-import com.vlad.todo.exception.CreationException;
+import com.vlad.todo.dto.TaskDtoRequest;
+import com.vlad.todo.dto.TaskDtoResponse;
 import com.vlad.todo.exception.NotFoundException;
 import com.vlad.todo.exception.UpdateException;
 import com.vlad.todo.mapper.TaskMapper;
-import com.vlad.todo.model.Task;
+import com.vlad.todo.model.TaskEntity;
+import com.vlad.todo.model.UserEntity;
 import com.vlad.todo.repository.TaskRepository;
+import com.vlad.todo.repository.UserRepository;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 @AllArgsConstructor
 public class TaskService {
     private final TaskMapper taskMapper;
     private TaskRepository taskRepository;
+    private UserRepository userRepository;
 
-    public List<Task> findAllTasks() {
-        return taskRepository.findAll();
+    public List<TaskDtoResponse> findAllTasks() {
+        List<TaskDtoResponse> tasksDtoResponse = new ArrayList<>();
+        taskRepository.findAll().forEach(
+                taskEntity -> tasksDtoResponse.add(taskMapper.toDto(taskEntity)));
+        return tasksDtoResponse;
     }
 
-    public ResponseEntity<Task> findTaskById(long id) {
-        return taskRepository.findById(id).map(
-                value -> new ResponseEntity<>(value, HttpStatus.OK))
-                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    public Task saveTask(@RequestBody TaskDto taskDto) {
-        if (taskRepository.existsByTitle(taskDto.getTitle())) {
-            throw new CreationException("Task with the same title already exists");
-        }
-        Task task = taskMapper.fromTaskDto(taskDto);
-        return taskRepository.save(task);
-    }
-
-    public Task updateTask(long id, @RequestBody TaskDto taskDto) {
-        Task task = taskRepository.findById(id)
+    public TaskDtoResponse findTaskById(long id) {
+        TaskEntity taskEntity = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format("Task with id %d not found", id))
-                );
+                        String.format("Task with id %d not found", id)));
+        return taskMapper.toDto(taskEntity);
+    }
 
-        if (taskDto.getTitle() != null) {
-            task.setTitle(taskDto.getTitle());
+    public TaskDtoResponse saveTask(TaskDtoRequest taskDtoRequest) {
+        UserEntity userEntity = userRepository.findById(taskDtoRequest.getUserId())
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("User with id %d not found", taskDtoRequest.getUserId())));
+        TaskEntity taskEntity = taskMapper.toEntity(taskDtoRequest);
+        taskEntity.setUser(userEntity);
+        taskRepository.save(taskEntity);
+        return taskMapper.toDto(taskEntity);
+    }
+
+    public TaskDtoResponse updateTask(long id, TaskDtoRequest taskDtoRequest) {
+        TaskEntity taskEntity = taskRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Task with id %d not found", id)));
+
+        if (taskDtoRequest.getTitle() != null) {
+            taskEntity.setTitle(taskDtoRequest.getTitle());
         }
-        if (taskDto.getContent() != null) {
-            task.setContent(taskDto.getContent());
+        if (taskDtoRequest.getContent() != null) {
+            taskEntity.setContent(taskDtoRequest.getContent());
         }
-        if (taskDto.getIsCompleted() != null) {
-            task.setIsCompleted(taskDto.getIsCompleted());
+        if (taskDtoRequest.getIsCompleted() != null) {
+            taskEntity.setIsCompleted(taskDtoRequest.getIsCompleted());
         }
-        if (taskDto.getTaskDeadline() != null) {
-            task.setTaskDeadline(taskDto.getTaskDeadline());
+        if (taskDtoRequest.getDeadlineDate() != null) {
+            taskEntity.setDeadlineDate(taskDtoRequest.getDeadlineDate());
         }
-        if (taskDto.getIsImportant() != null) {
-            task.setIsImportant(taskDto.getIsImportant());
+        if (taskDtoRequest.getIsImportant() != null) {
+            taskEntity.setIsImportant(taskDtoRequest.getIsImportant());
         }
         try {
-            return taskRepository.save(task);
+            taskRepository.save(taskEntity);
+            return taskMapper.toDto(taskEntity);
         } catch (DataIntegrityViolationException ex) {
-            throw new UpdateException(
-                    "Error updating task with title: " + taskDto.getTitle()
-            );
+            throw new UpdateException("Error updating task with id: " + id);
         }
     }
 
     public void deleteTaskById(long id) {
         if (!taskRepository.existsById(id)) {
-            System.out.printf("Task with id %d not found.", id);
             throw new NotFoundException(
-                String.format("Task with id %d not found.", id)
-            );
+                String.format("Task with id %d not found.", id));
         }
         taskRepository.deleteById(id);
     }

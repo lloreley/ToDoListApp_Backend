@@ -1,10 +1,10 @@
 package com.vlad.todo.controller;
 
-import com.vlad.todo.dto.TaskDto;
+import com.vlad.todo.dto.TaskDtoRequest;
+import com.vlad.todo.dto.TaskDtoResponse;
 import com.vlad.todo.exception.CreationException;
 import com.vlad.todo.exception.NotFoundException;
 import com.vlad.todo.exception.UpdateException;
-import com.vlad.todo.model.Task;
 import com.vlad.todo.service.TaskService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
@@ -33,40 +32,33 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Task>> tasksByFilter(
+    public List<TaskDtoResponse> tasksByFilter(
             @RequestParam(required = false) Boolean completed) {
-
-        List<Task> taskList;
         if (completed != null) {
-            taskList = taskService.findAllTasks().stream()
-                    .filter(todo -> todo.getIsCompleted() != null
-                            && todo.getIsCompleted() == completed)
+            return taskService.findAllTasks().stream()
+                    .filter(taskDtoResponse -> taskDtoResponse.getIsCompleted() != null
+                            && taskDtoResponse.getIsCompleted() == completed)
                     .toList();
-        } else {
-            taskList = taskService.findAllTasks();
         }
-        if (taskList.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(taskList, HttpStatus.OK);
+        return taskService.findAllTasks();
     }
 
-    @PostMapping("saveTask")
-    public Task saveTask(@RequestBody TaskDto taskDto) {
+    @PostMapping("/saveTask")
+    public TaskDtoResponse saveTask(@RequestBody TaskDtoRequest taskDto) {
         return taskService.saveTask(taskDto);
     }
 
     @PutMapping("/{id}")
-    public Task updateTask(@PathVariable long id, @RequestBody TaskDto taskDto) {
+    public TaskDtoResponse updateTask(@PathVariable long id, @RequestBody TaskDtoRequest taskDto) {
         return taskService.updateTask(id, taskDto);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> findTaskById(@PathVariable long id) {
+    public TaskDtoResponse findTaskById(@PathVariable long id) {
         return taskService.findTaskById(id);
     }
 
-    @DeleteMapping("deleteTask/{id}")
+    @DeleteMapping("/deleteTask/{id}")
     public void deleteTaskById(@PathVariable long id) {
         taskService.deleteTaskById(id);
     }
@@ -85,5 +77,4 @@ public class TaskController {
     public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
-
 }
