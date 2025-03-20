@@ -1,11 +1,11 @@
 package com.vlad.todo.controller;
 
-import com.vlad.todo.dto.TaskDtoRequest;
-import com.vlad.todo.dto.TaskDtoResponse;
+import com.vlad.todo.dto.UserDtoRequest;
+import com.vlad.todo.dto.UserDtoResponse;
 import com.vlad.todo.exception.CreationException;
 import com.vlad.todo.exception.NotFoundException;
 import com.vlad.todo.exception.UpdateException;
-import com.vlad.todo.service.TaskService;
+import com.vlad.todo.service.UserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,49 +18,42 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/tasks")
-public class TaskController {
-    private final TaskService taskService;
+@RequestMapping("/users")
+public class UserController {
+    private final UserService userService;
 
     @Autowired
-    public TaskController(TaskService taskService) {
-        this.taskService = taskService;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping
-    public List<TaskDtoResponse> tasksByFilter(
-            @RequestParam(required = false) Boolean completed) {
-        if (completed != null) {
-            return taskService.findAllTasks().stream()
-                    .filter(taskDtoResponse -> taskDtoResponse.getIsCompleted() != null
-                            && taskDtoResponse.getIsCompleted() == completed)
-                    .toList();
-        }
-        return taskService.findAllTasks();
+    public List<UserDtoResponse> allUsers() {
+        return userService.findAll();
     }
 
-    @PostMapping("/saveTask")
-    public TaskDtoResponse saveTask(@RequestBody TaskDtoRequest taskDto) {
-        return taskService.saveTask(taskDto);
-    }
-
-    @PutMapping("/{id}")
-    public TaskDtoResponse updateTask(@PathVariable long id, @RequestBody TaskDtoRequest taskDto) {
-        return taskService.updateTask(id, taskDto);
+    @PostMapping("/saveUser")
+    public UserDtoResponse saveUser(@RequestBody UserDtoRequest userDtoRequest) {
+        return userService.save(userDtoRequest);
     }
 
     @GetMapping("/{id}")
-    public TaskDtoResponse findTaskById(@PathVariable long id) {
-        return taskService.findTaskById(id);
+    public UserDtoResponse findUserById(@PathVariable long id) {
+        return userService.findById(id);
     }
 
-    @DeleteMapping("/deleteTask/{id}")
-    public void deleteTaskById(@PathVariable long id) {
-        taskService.deleteTaskById(id);
+    @PutMapping("/{id}")
+    public UserDtoResponse updateUser(@PathVariable long id,
+                                      @RequestBody UserDtoRequest userDtoRequest) {
+        return userService.updateUser(id, userDtoRequest);
+    }
+
+    @DeleteMapping("/deleteUser/{id}")
+    public void deleteUser(@PathVariable long id) {
+        userService.deleteUserById(id);
     }
 
     @ExceptionHandler(CreationException.class)
@@ -77,4 +70,5 @@ public class TaskController {
     public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+
 }
