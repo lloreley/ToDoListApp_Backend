@@ -61,6 +61,10 @@ public class UserService {
         if (userDtoRequest.getFirstName() != null) {
             userEntity.setFirstName(userDtoRequest.getFirstName());
         }
+        if(userDtoRequest.getTasksDtoRequest() != null && !userDtoRequest.getTasksDtoRequest().isEmpty()) {
+            userEntity.getTasks().addAll(userMapper.toEntity(userDtoRequest).getTasks());
+            userEntity.getTasks().forEach(taskEntity -> taskEntity.setUser(userEntity));
+        }
         try {
             userRepository.save(userEntity);
             return userMapper.toDto(userEntity);
