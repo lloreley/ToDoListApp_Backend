@@ -4,8 +4,8 @@ import com.vlad.todo.dto.TaskDtoRequest;
 import com.vlad.todo.dto.TaskDtoResponse;
 import com.vlad.todo.dto.UserDtoRequest;
 import com.vlad.todo.dto.UserDtoResponse;
-import com.vlad.todo.model.TaskEntity;
-import com.vlad.todo.model.UserEntity;
+import com.vlad.todo.model.Task;
+import com.vlad.todo.model.User;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -16,38 +16,22 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
     private final TaskMapper taskMapper;
 
-    public UserEntity toEntity(UserDtoRequest userDtoRequest) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setFirstName(userDtoRequest.getFirstName());
-        userEntity.setLastName(userDtoRequest.getLastName());
-        userEntity.setEmail(userDtoRequest.getEmail());
-        userEntity.setPhone(userDtoRequest.getPhone());
-
-        if (userDtoRequest.getTasks() != null) {
-            List<TaskEntity> entityTasks = new ArrayList<>();
-            for (TaskDtoRequest taskDtoRequest : userDtoRequest.getTasks()) {
-                TaskEntity taskEntity = taskMapper.toEntity(taskDtoRequest);
-                taskEntity.setUser(userEntity);
-                entityTasks.add(taskEntity);
-            }
-            userEntity.setTasks(entityTasks);
-        }
-        return userEntity;
+    public User toEntity(UserDtoRequest userDtoRequest) {
+        User user = new User();
+        user.setFirstName(userDtoRequest.getFirstName());
+        user.setLastName(userDtoRequest.getLastName());
+        user.setEmail(userDtoRequest.getEmail());
+        user.setPhone(userDtoRequest.getPhone());
+        return user;
     }
 
-    public UserDtoResponse toDto(UserEntity userEntity) {
+    public UserDtoResponse toDto(User user) {
         UserDtoResponse userDtoResponse = new UserDtoResponse();
-        userDtoResponse.setId(userEntity.getId());
-        userDtoResponse.setEmail(userEntity.getEmail());
-        userDtoResponse.setFirstName(userEntity.getFirstName());
-        userDtoResponse.setLastName(userEntity.getLastName());
-        userDtoResponse.setPhone(userEntity.getPhone());
-        List<TaskDtoResponse> tasksDtoResponse = new ArrayList<>();
-        for (TaskEntity taskEntity : userEntity.getTasks()) {
-            tasksDtoResponse.add(taskMapper.toDto(taskEntity));
-        }
-        userDtoResponse.setTasks(tasksDtoResponse);
-        userDtoResponse.setGroups(userEntity.getGroups());
+        userDtoResponse.setId(user.getId());
+        userDtoResponse.setEmail(user.getEmail());
+        userDtoResponse.setFirstName(user.getFirstName());
+        userDtoResponse.setLastName(user.getLastName());
+        userDtoResponse.setPhone(user.getPhone());
         return userDtoResponse;
     }
 }

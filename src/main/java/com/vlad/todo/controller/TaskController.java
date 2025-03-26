@@ -34,6 +34,11 @@ public class TaskController {
         return taskService.findAllTasks();
     }
 
+    @GetMapping("/by-user/{userId}")
+    public List<TaskDtoResponse> tasksByUser(@PathVariable long userId) {
+        return taskService.findTasksByUser(userId);
+    }
+
     @PostMapping("/saveTask")
     public TaskDtoResponse saveTask(@RequestBody TaskDtoRequest taskDto) {
         return taskService.saveTask(taskDto);

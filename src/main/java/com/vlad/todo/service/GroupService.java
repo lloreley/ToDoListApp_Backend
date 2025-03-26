@@ -5,8 +5,9 @@ import com.vlad.todo.dto.GroupDtoResponse;
 import com.vlad.todo.exception.NotFoundException;
 import com.vlad.todo.exception.UpdateException;
 import com.vlad.todo.mapper.GroupMapper;
-import com.vlad.todo.model.GroupEntity;
+import com.vlad.todo.model.Group;
 import com.vlad.todo.repository.GroupRepository;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class GroupService {
     private final GroupMapper groupMapper;
     private GroupRepository groupRepository;
@@ -22,47 +24,47 @@ public class GroupService {
     public List<GroupDtoResponse> findAll() {
         List<GroupDtoResponse> groupsDtoResponse = new ArrayList<>();
         groupRepository.findAll().forEach(
-                groupEntity -> groupsDtoResponse.add(groupMapper.toDto(groupEntity)));
+                group -> groupsDtoResponse.add(groupMapper.toDto(group)));
         return groupsDtoResponse;
     }
 
     public GroupDtoResponse findById(long id) {
-        GroupEntity taskEntity = groupRepository.findById(id)
+        Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Group with id %d not found", id)));
-        return groupMapper.toDto(taskEntity);
+        return groupMapper.toDto(group);
     }
 
     public GroupDtoResponse save(GroupDtoRequest groupDtoRequest) {
-        GroupEntity groupEntity = groupMapper.toEntity(groupDtoRequest);
-        groupRepository.save(groupEntity);
-        return groupMapper.toDto(groupEntity);
+        Group group = groupMapper.toEntity(groupDtoRequest);
+        groupRepository.save(group);
+        return groupMapper.toDto(group);
     }
 
     public GroupDtoResponse update(long id, GroupDtoRequest groupDtoRequest) {
-        GroupEntity groupEntity = groupRepository.findById(id)
+        Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Group with id %d not found", id)));
 
         if (groupDtoRequest.getName() != null) {
-            groupEntity.setName(groupDtoRequest.getName());
+            group.setName(groupDtoRequest.getName());
         }
         if (groupDtoRequest.getDescription() != null) {
-            groupEntity.setDescription(groupDtoRequest.getDescription());
+            group.setDescription(groupDtoRequest.getDescription());
         }
         try {
-            groupRepository.save(groupEntity);
-            return groupMapper.toDto(groupEntity);
+            groupRepository.save(group);
+            return groupMapper.toDto(group);
         } catch (DataIntegrityViolationException ex) {
             throw new UpdateException("Error updating Group with id: " + id);
         }
     }
 
     public void deleteById(long id) {
-        GroupEntity groupEntity = groupRepository.findById(id)
+        Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Group with id %d not found.", id)));
-        groupEntity.getUsers().forEach(userEntity -> userEntity.getGroups().remove(groupEntity));
+        group.getUsers().forEach(user -> user.getGroups().remove(group));
         groupRepository.deleteById(id);
     }
 }

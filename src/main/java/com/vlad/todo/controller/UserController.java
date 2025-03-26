@@ -5,6 +5,7 @@ import com.vlad.todo.dto.UserDtoResponse;
 import com.vlad.todo.exception.CreationException;
 import com.vlad.todo.exception.NotFoundException;
 import com.vlad.todo.exception.UpdateException;
+import com.vlad.todo.service.GroupService;
 import com.vlad.todo.service.UserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+    private final GroupService groupService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, GroupService groupService) {
         this.userService = userService;
+        this.groupService = groupService;
     }
 
     @GetMapping
@@ -30,6 +33,14 @@ public class UserController {
     @PostMapping("/saveUser")
     public UserDtoResponse saveUser(@RequestBody UserDtoRequest userDtoRequest) {
         return userService.save(userDtoRequest);
+    }
+
+    @GetMapping("/by-group/{groupId}")
+    public List<UserDtoResponse> findUsersByGroup(@PathVariable long groupId) {
+        if (groupService.findById(groupId) == null) {
+            throw new NotFoundException("Group with id " + groupId + " not found");
+        }
+        return userService.findUsersByGroup(groupId);
     }
 
     @GetMapping("/{id}")

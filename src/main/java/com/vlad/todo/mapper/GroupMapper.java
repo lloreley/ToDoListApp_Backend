@@ -1,8 +1,8 @@
 package com.vlad.todo.mapper;
 
 import com.vlad.todo.dto.*;
-import com.vlad.todo.model.GroupEntity;
-import com.vlad.todo.model.UserEntity;
+import com.vlad.todo.model.Group;
+import com.vlad.todo.model.User;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -13,22 +13,22 @@ import org.springframework.stereotype.Component;
 public class GroupMapper {
     private final UserMapper userMapper;
 
-    public GroupEntity toEntity(GroupDtoRequest groupDtoRequest) {
-        GroupEntity groupEntity = new GroupEntity();
-        groupEntity.setName(groupDtoRequest.getName());
-        groupEntity.setDescription(groupDtoRequest.getDescription());
-        return groupEntity;
+    public Group toEntity(GroupDtoRequest groupDtoRequest) {
+        Group group = new Group();
+        group.setName(groupDtoRequest.getName());
+        group.setDescription(groupDtoRequest.getDescription());
+        return group;
     }
 
-    public GroupDtoResponse toDto(GroupEntity groupEntity) {
+    public GroupDtoResponse toDto(Group group) {
         GroupDtoResponse groupDtoResponse = new GroupDtoResponse();
-        groupDtoResponse.setName(groupEntity.getName());
-        groupDtoResponse.setDescription(groupEntity.getDescription());
-        groupDtoResponse.setId(groupEntity.getId());
+        groupDtoResponse.setName(group.getName());
+        groupDtoResponse.setDescription(group.getDescription());
+        groupDtoResponse.setId(group.getId());
 
         List<UserDtoResponse> usersDtoResponse = new ArrayList<>();
-        for (UserEntity userEntity : groupEntity.getUsers()) {
-            usersDtoResponse.add(userMapper.toDto(userEntity));
+        for (User user : group.getUsers()) {
+            usersDtoResponse.add(userMapper.toDto(user));
         }
         groupDtoResponse.setUsers(usersDtoResponse);
         return groupDtoResponse;

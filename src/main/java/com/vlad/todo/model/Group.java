@@ -1,6 +1,5 @@
 package com.vlad.todo.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -12,7 +11,8 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupEntity {
+@Table(name = "groups")
+public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,19 +28,18 @@ public class GroupEntity {
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    @JsonBackReference
-    private List<UserEntity> users = new ArrayList<>();
+    private List<User> users = new ArrayList<>();
 
-    public void addUser(UserEntity userEntity) {
-        if (!users.contains(userEntity)) {
-            users.add(userEntity);
-            userEntity.getGroups().add(this);
+    public void addUser(User user) {
+        if (!users.contains(user)) {
+            users.add(user);
+            user.getGroups().add(this);
         }
     }
 
-    public void removeUser(UserEntity userEntity) {
-        users.remove(userEntity);
-        userEntity.getGroups().remove(this);
+    public void removeUser(User user) {
+        users.remove(user);
+        user.getGroups().remove(this);
     }
 
 }

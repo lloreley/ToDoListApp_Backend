@@ -2,13 +2,15 @@ package com.vlad.todo.service;
 
 import com.vlad.todo.dto.TaskDtoRequest;
 import com.vlad.todo.dto.TaskDtoResponse;
+import com.vlad.todo.dto.UserDtoResponse;
 import com.vlad.todo.exception.NotFoundException;
 import com.vlad.todo.exception.UpdateException;
 import com.vlad.todo.mapper.TaskMapper;
-import com.vlad.todo.model.TaskEntity;
-import com.vlad.todo.model.UserEntity;
+import com.vlad.todo.model.Task;
+import com.vlad.todo.model.User;
 import com.vlad.todo.repository.TaskRepository;
 import com.vlad.todo.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class TaskService {
     private final TaskMapper taskMapper;
     private TaskRepository taskRepository;
@@ -25,50 +28,58 @@ public class TaskService {
     public List<TaskDtoResponse> findAllTasks() {
         List<TaskDtoResponse> tasksDtoResponse = new ArrayList<>();
         taskRepository.findAll().forEach(
-                taskEntity -> tasksDtoResponse.add(taskMapper.toDto(taskEntity)));
+                task -> tasksDtoResponse.add(taskMapper.toDto(task)));
+        return tasksDtoResponse;
+    }
+
+    public List<TaskDtoResponse> findTasksByUser(long userId) {
+        List<Task> tasks = taskRepository.findByUser(userId);
+        List<TaskDtoResponse> tasksDtoResponse = new ArrayList<>();
+
+        tasks.forEach(task -> tasksDtoResponse.add(taskMapper.toDto(task)));
         return tasksDtoResponse;
     }
 
     public TaskDtoResponse findTaskById(long id) {
-        TaskEntity taskEntity = taskRepository.findById(id)
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Task with id %d not found", id)));
-        return taskMapper.toDto(taskEntity);
+        return taskMapper.toDto(task);
     }
 
     public TaskDtoResponse saveTask(TaskDtoRequest taskDtoRequest) {
-        UserEntity userEntity = userRepository.findById(taskDtoRequest.getUserId())
+        User user = userRepository.findById(taskDtoRequest.getUserId())
                 .orElseThrow(() -> new NotFoundException(
                         String.format("User with id %d not found", taskDtoRequest.getUserId())));
-        TaskEntity taskEntity = taskMapper.toEntity(taskDtoRequest);
-        taskEntity.setUser(userEntity);
-        taskRepository.save(taskEntity);
-        return taskMapper.toDto(taskEntity);
+        Task task = taskMapper.toEntity(taskDtoRequest);
+        task.setUser(user);
+        taskRepository.save(task);
+        return taskMapper.toDto(task);
     }
 
     public TaskDtoResponse updateTask(long id, TaskDtoRequest taskDtoRequest) {
-        TaskEntity taskEntity = taskRepository.findById(id)
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Task with id %d not found", id)));
 
         if (taskDtoRequest.getTitle() != null) {
-            taskEntity.setTitle(taskDtoRequest.getTitle());
+            task.setTitle(taskDtoRequest.getTitle());
         }
         if (taskDtoRequest.getContent() != null) {
-            taskEntity.setContent(taskDtoRequest.getContent());
+            task.setContent(taskDtoRequest.getContent());
         }
         if (taskDtoRequest.getIsCompleted() != null) {
-            taskEntity.setIsCompleted(taskDtoRequest.getIsCompleted());
+            task.setIsCompleted(taskDtoRequest.getIsCompleted());
         }
         if (taskDtoRequest.getDeadlineDate() != null) {
-            taskEntity.setDeadlineDate(taskDtoRequest.getDeadlineDate());
+            task.setDeadlineDate(taskDtoRequest.getDeadlineDate());
         }
         if (taskDtoRequest.getIsImportant() != null) {
-            taskEntity.setIsImportant(taskDtoRequest.getIsImportant());
+            task.setIsImportant(taskDtoRequest.getIsImportant());
         }
         try {
-            taskRepository.save(taskEntity);
-            return taskMapper.toDto(taskEntity);
+            taskRepository.save(task);
+            return taskMapper.toDto(task);
         } catch (DataIntegrityViolationException ex) {
             throw new UpdateException("Error updating task with id: " + id);
         }
