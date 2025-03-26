@@ -7,3 +7,4 @@ public class GroupDtoRequest {
     private String name;
     private String description;
 }
+
