@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Transactional
 public class GroupService {
-    public static final String GroupWithIdNotFound = "Группа с id %d не найдена";
+    public static final String GROUP_WITH_ID_NOT_FOUND = "Группа с id %d не найдена";
 
     private final GroupMapper groupMapper;
     private GroupRepository groupRepository;
@@ -31,7 +31,7 @@ public class GroupService {
     public GroupDtoResponse findById(long id) {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(GroupWithIdNotFound, id)));
+                        String.format(GROUP_WITH_ID_NOT_FOUND, id)));
         return groupMapper.toDto(group);
     }
 
@@ -44,7 +44,7 @@ public class GroupService {
     public GroupDtoResponse update(long id, GroupDtoRequest groupDtoRequest) {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(GroupWithIdNotFound, id)));
+                        String.format(GROUP_WITH_ID_NOT_FOUND, id)));
 
         if (groupDtoRequest.getName() != null) {
             group.setName(groupDtoRequest.getName());
@@ -67,7 +67,7 @@ public class GroupService {
     public void deleteById(long id) {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(GroupWithIdNotFound, id)));
+                        String.format(GROUP_WITH_ID_NOT_FOUND, id)));
         group.getUsers().forEach(user -> user.getGroups().remove(group));
         groupRepository.deleteById(id);
     }

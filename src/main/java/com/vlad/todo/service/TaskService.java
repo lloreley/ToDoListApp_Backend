@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Transactional
 public class TaskService {
-    public static final String TaskWithIdNotFound = "Задача с id %d не найдена";
+    public static final String TASK_WITH_ID_NOT_FOUND = "Задача с id %d не найдена";
 
     private final TaskMapper taskMapper;
     private TaskRepository taskRepository;
@@ -42,14 +42,14 @@ public class TaskService {
     public TaskDtoResponse findTaskById(long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(TaskWithIdNotFound, id)));
+                        String.format(TASK_WITH_ID_NOT_FOUND, id)));
         return taskMapper.toDto(task);
     }
 
     public TaskDtoResponse saveTask(TaskDtoRequest taskDtoRequest) {
         User user = userRepository.findById(taskDtoRequest.getUserId())
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(TaskWithIdNotFound, taskDtoRequest.getUserId())));
+                        String.format(TASK_WITH_ID_NOT_FOUND, taskDtoRequest.getUserId())));
         Task task = taskMapper.toEntity(taskDtoRequest);
         task.setUser(user);
         taskRepository.save(task);
@@ -59,7 +59,7 @@ public class TaskService {
     public TaskDtoResponse updateTask(long id, TaskDtoRequest taskDtoRequest) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(TaskWithIdNotFound, id)));
+                        String.format(TASK_WITH_ID_NOT_FOUND, id)));
 
         if (taskDtoRequest.getTitle() != null) {
             task.setTitle(taskDtoRequest.getTitle());
@@ -83,7 +83,7 @@ public class TaskService {
     public void deleteTaskById(long id) {
         if (!taskRepository.existsById(id)) {
             throw new NotFoundException(
-                String.format(TaskWithIdNotFound, id));
+                String.format(TASK_WITH_ID_NOT_FOUND, id));
         }
         taskRepository.deleteById(id);
     }

@@ -1,6 +1,6 @@
 package com.vlad.todo.service;
 
-import static com.vlad.todo.service.GroupService.GroupWithIdNotFound;
+import static com.vlad.todo.service.GroupService.GROUP_WITH_ID_NOT_FOUND;
 
 import com.vlad.todo.cache.UserCache;
 import com.vlad.todo.dto.UserDtoRequest;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class UserService {
 
-    private static final String UserWithIdNotFound = "Пользователь с id %d не найдена";
+    private static final String USER_WITH_ID_NOT_FOUND = "Пользователь с id %d не найдена";
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
@@ -43,7 +43,7 @@ public class UserService {
         }
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(UserWithIdNotFound, id)));
+                        String.format(USER_WITH_ID_NOT_FOUND, id)));
         userCache.put(id, userMapper.toDto(user));
         return userMapper.toDto(user);
     }
@@ -63,7 +63,7 @@ public class UserService {
     public UserDtoResponse updateUser(long id, UserDtoRequest userDtoRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(UserWithIdNotFound, id)));
+                        String.format(USER_WITH_ID_NOT_FOUND, id)));
 
         if (userDtoRequest.getEmail() != null) {
             user.setEmail(userDtoRequest.getEmail());
@@ -85,7 +85,7 @@ public class UserService {
     public void deleteUserById(long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(UserWithIdNotFound, id)));
+                        String.format(USER_WITH_ID_NOT_FOUND, id)));
         user.getGroups().forEach(group -> group.getUsers().remove(user));
         userCache.remove(id);
         userRepository.deleteById(id);
@@ -101,10 +101,10 @@ public class UserService {
     public void addUserToGroup(long userId, long groupId) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(GroupWithIdNotFound, groupId)));
+                        String.format(GROUP_WITH_ID_NOT_FOUND, groupId)));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(UserWithIdNotFound, userId)));
+                        String.format(USER_WITH_ID_NOT_FOUND, userId)));
         group.addUser(user);
         groupRepository.save(group);
     }
@@ -112,10 +112,10 @@ public class UserService {
     public void removeUserFromGroup(long userId, long groupId) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(GroupWithIdNotFound, groupId)));
+                        String.format(GROUP_WITH_ID_NOT_FOUND, groupId)));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(UserWithIdNotFound, userId)));
+                        String.format(USER_WITH_ID_NOT_FOUND, userId)));
         group.removeUser(user);
         groupRepository.save(group);
     }
