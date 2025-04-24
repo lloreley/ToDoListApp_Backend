@@ -1,4 +1,4 @@
-package com.vlad.todo.cache;
+package com.vlad.todo.config;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;

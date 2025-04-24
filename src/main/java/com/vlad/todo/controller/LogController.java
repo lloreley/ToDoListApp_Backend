@@ -28,7 +28,7 @@ public class LogController {
             description = "Возвращает .log файл с записями логов за указанную дату")
     @GetMapping("/download")
     public ResponseEntity<Resource> downloadLogFile(
-            @Parameter(description = "Дата логов в формате dd-MM-yyyy") @RequestParam String date) {
+            @Parameter(description = "Дата логов в формате dd-mm-yyyy") @RequestParam String date) {
         Resource resource = logService.downloadLogs(date);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)

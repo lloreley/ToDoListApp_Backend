@@ -2,6 +2,7 @@ package com.vlad.todo.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -18,7 +19,9 @@ public class UserDtoRequest {
     @NotBlank(message = "Электронная почта не должна быть пустой")
     @Email(message = "Электронная почта задана неверно")
     private String email;
-    @Size(min = 3, max = 15, message = "Длина номера должна быть от 3 до 15")
+    @Pattern(regexp = "^\\+\\d{5,14}$",
+            message = "Номер телефона должен начинаться с '+' и "
+                    + "содержать от 6 до 15 символов (включая '+')")
     @NotBlank(message = "Номер не должен быть пустой")
     private String phone;
 }

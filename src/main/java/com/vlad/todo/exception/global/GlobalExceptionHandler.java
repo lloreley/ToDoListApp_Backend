@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex) {
         String errorMessage = ex.getBindingResult().getAllErrors().stream()
                 .map(error -> error.getDefaultMessage())
-                .collect(Collectors.joining("; ")); // Сообщения об ошибках соединяем в одну строку
+                .collect(Collectors.joining("; "));
 
         log.error("Validation error: {}", errorMessage);
 

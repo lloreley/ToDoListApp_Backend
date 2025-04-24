@@ -1,7 +1,10 @@
 package com.vlad.todo.service;
 
+import static com.vlad.todo.service.UserService.USER_WITH_ID_NOT_FOUND;
+
 import com.vlad.todo.dto.TaskDtoRequest;
 import com.vlad.todo.dto.TaskDtoResponse;
+import com.vlad.todo.exception.InvalidInputException;
 import com.vlad.todo.exception.NotFoundException;
 import com.vlad.todo.mapper.TaskMapper;
 import com.vlad.todo.model.Task;
@@ -47,9 +50,12 @@ public class TaskService {
     }
 
     public TaskDtoResponse saveTask(TaskDtoRequest taskDtoRequest) {
+        if (taskDtoRequest.getUserId() < 1) {
+            throw new InvalidInputException("Id пользователя должен быть больше 0");
+        }
         User user = userRepository.findById(taskDtoRequest.getUserId())
                 .orElseThrow(() -> new NotFoundException(
-                        String.format(TASK_WITH_ID_NOT_FOUND, taskDtoRequest.getUserId())));
+                        String.format(USER_WITH_ID_NOT_FOUND, taskDtoRequest.getUserId())));
         Task task = taskMapper.toEntity(taskDtoRequest);
         task.setUser(user);
         taskRepository.save(task);

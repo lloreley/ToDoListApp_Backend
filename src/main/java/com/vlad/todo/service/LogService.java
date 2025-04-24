@@ -49,22 +49,22 @@ public class LogService {
         return resource;
     }
 
-    private LocalDate parseDate(String date) {
+    public LocalDate parseDate(String date) {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             return LocalDate.parse(date, formatter);
         } catch (DateTimeParseException e) {
-            throw new InvalidInputException("Неверный формат даты. Требуется dd-MM-yyyy");
+            throw new InvalidInputException("Неверный формат даты. Требуется dd-mm-yyyy");
         }
     }
 
-    private void validateLogFileExists(Path path) {
+    public void validateLogFileExists(Path path) {
         if (!Files.exists(path)) {
             throw new NotFoundException("Файл не существует: " + LOG_FILE_PATH);
         }
     }
 
-    private Path createTempFile(LocalDate logDate) {
+    public Path createTempFile(LocalDate logDate) {
         try {
             File tempFile = Files.createTempFile(TEMP_DIR, "log-"
                     + logDate + "-", ".log").toFile();
@@ -89,7 +89,7 @@ public class LogService {
         }
     }
 
-    private void filterAndWriteLogsToTempFile(Path logFilePath,
+    public void filterAndWriteLogsToTempFile(Path logFilePath,
                                               String formattedDate, Path tempFilePath) {
         try (BufferedReader reader = Files.newBufferedReader(logFilePath)) {
             Files.write(tempFilePath, reader.lines()
@@ -102,7 +102,7 @@ public class LogService {
         }
     }
 
-    private Resource createResourceFromTempFile(Path tempFilePath, String date) {
+    public Resource createResourceFromTempFile(Path tempFilePath, String date) {
         try {
             if (Files.size(tempFilePath) == 0) {
                 throw new NotFoundException("Нет логов за указанную дату: " + date);

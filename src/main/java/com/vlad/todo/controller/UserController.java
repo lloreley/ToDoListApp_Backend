@@ -11,11 +11,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @Tag(name = "Пользователи", description = "API для управления пользователями")
 @RestController
 @RequestMapping("/users")
@@ -35,6 +37,7 @@ public class UserController {
     public ResponseEntity<List<UserDtoResponse>> allUsers() {
         return ResponseEntity.ok(userService.findAll());
     }
+
 
     @Operation(summary = "Создать пользователя",
             description = "Создает нового пользователя и возвращает его данные")
@@ -69,6 +72,7 @@ public class UserController {
         }
         return ResponseEntity.ok(userService.findById(id));
     }
+
 
     @Operation(summary = "Обновить пользователя",
             description = "Обновляет информацию о пользователе по его ID")
@@ -126,4 +130,17 @@ public class UserController {
         userService.removeUserFromGroup(userId, groupId);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "Создать нескольких пользователей",
+            description = "Создает новых пользователей и возвращает их данные")
+    @PostMapping("/saveAll")
+    public ResponseEntity<List<UserDtoResponse>> saveAllUsers(
+            @Parameter(description = "Данные новых пользователей")
+            @Valid @RequestBody List<UserDtoRequest> userDtoRequests) {
+        log.info("here");
+        List<UserDtoResponse> savedUsers = userService.saveAll(userDtoRequests);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedUsers);
+    }
+
+
 }

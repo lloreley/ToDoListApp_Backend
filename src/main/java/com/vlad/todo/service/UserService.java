@@ -15,6 +15,7 @@ import com.vlad.todo.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class UserService {
 
-    private static final String USER_WITH_ID_NOT_FOUND = "Пользователь с id %d не найдена";
+    public static final String USER_WITH_ID_NOT_FOUND = "Пользователь с id %d не найден";
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
@@ -118,5 +119,23 @@ public class UserService {
                         String.format(USER_WITH_ID_NOT_FOUND, userId)));
         group.removeUser(user);
         groupRepository.save(group);
+    }
+
+    @Transactional
+    public List<UserDtoResponse> saveAll(List<UserDtoRequest> userDtoRequests) {
+        List<UserDtoResponse> usersDtoResponses = userDtoRequests.stream()
+                .map(userDtoRequest -> {
+                    if (userRepository.existsByEmail(userDtoRequest.getEmail())
+                            || userRepository.existsByPhone(userDtoRequest.getPhone())) {
+                        throw new AlreadyExistsException(
+                                "Пользователь с такой-же почтой/телефоном уже существует");
+                    }
+                    User user = userMapper.toEntity(userDtoRequest);
+                    userRepository.save(user);
+                    return userMapper.toDto(user);
+                })
+                .collect(Collectors.toList());
+
+        return usersDtoResponses;
     }
 }
