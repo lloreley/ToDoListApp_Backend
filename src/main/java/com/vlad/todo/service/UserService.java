@@ -130,6 +130,7 @@ public class UserService {
                         throw new AlreadyExistsException(
                                 "Пользователь с такой-же почтой/телефоном уже существует");
                     }
+
                     User user = userMapper.toEntity(userDtoRequest);
                     userRepository.save(user);
                     return userMapper.toDto(user);
