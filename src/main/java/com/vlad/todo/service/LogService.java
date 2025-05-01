@@ -41,6 +41,7 @@ public class LogService {
     private final AtomicLong idCounter = new AtomicLong(1);
     private final Map<Long, LogObject> tasks = new ConcurrentHashMap<>();
     private static final String LOG_FILE_PATH = "log/app.log";
+    private static final String DATE_FORMAT = "yyyy-mm-dd";
 
     private final Executor executor;
 
@@ -61,14 +62,11 @@ public class LogService {
         }
     }
 
-
-
-
     public Resource downloadLogs(String date) {
         LocalDate logDate = parseDate(date);
         Path logFilePath = Paths.get(LOG_FILE_PATH);
         validateLogFileExists(logFilePath);
-        String formattedDate = logDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        String formattedDate = logDate.format(DateTimeFormatter.ofPattern(DATE_FORMAT));
 
         Path tempFile = createTempFile(logDate);
         filterAndWriteLogsToTempFile(logFilePath, formattedDate, tempFile);
@@ -80,7 +78,7 @@ public class LogService {
 
     public LocalDate parseDate(String date) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
             return LocalDate.parse(date, formatter);
         } catch (DateTimeParseException e) {
             throw new InvalidInputException("Invalid date format. Required dd-MM-yyyy");
@@ -163,7 +161,7 @@ public class LogService {
         try {
             Thread.sleep(20000);
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
             LocalDate logDate = LocalDate.parse(date, formatter);
 
             Path path = Paths.get(LOG_FILE_PATH);
@@ -216,7 +214,7 @@ public class LogService {
         Long id = idCounter.getAndIncrement();
         LogObject logObject = new LogObject(id, "IN_PROGRESS");
         tasks.put(id, logObject);
-        executor.execute(() -> createLogs(id, date));
+        executor.execute(() -> this.createLogs(id, date));
         return id;
     }
 
@@ -259,5 +257,4 @@ public class LogService {
                         "attachment; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
     }
-
 }
