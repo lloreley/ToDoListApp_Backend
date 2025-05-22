@@ -157,10 +157,13 @@ public class LogService {
     public void createLogs(Long taskId, String date) {
         try {
             Thread.sleep(20000);
+
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             LocalDate logDate = LocalDate.parse(date, formatter);
+
             Path path = Paths.get(LOG_FILE_PATH);
             List<String> logLines = Files.readAllLines(path);
+
             String formattedDate = logDate.format(formatter);
             List<String> currentLogs = logLines.stream()
                     .filter(line -> line.startsWith(formattedDate))
@@ -176,11 +179,12 @@ public class LogService {
                         "Нет логов за дату: " + date);
             }
 
-            // Безопасное создание временной директории и файла
             Path tempDir;
-            Path logFile;
             if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                tempDir = Files.createTempDirectory("myapp-logs");
+                String userHome = System.getProperty("user.home");
+                Path baseDir = Paths.get(userHome, "myapp-temp");
+                Files.createDirectories(baseDir); // Убедитесь, что директория существует
+                tempDir = Files.createTempDirectory(baseDir, "logs-");
             } else {
                 FileAttribute<Set<PosixFilePermission>> attr =
                         PosixFilePermissions.asFileAttribute(
@@ -188,7 +192,7 @@ public class LogService {
                 tempDir = Files.createTempDirectory("myapp-logs", attr);
             }
 
-            logFile = Files.createTempFile(tempDir, "logs-" + formattedDate + "-", ".log");
+            Path logFile = Files.createTempFile(tempDir, "logs-" + formattedDate + "-", ".log");
             Files.write(logFile, currentLogs);
             logFile.toFile().deleteOnExit();
 
