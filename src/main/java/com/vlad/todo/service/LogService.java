@@ -153,15 +153,12 @@ public class LogService {
                     + e.getMessage());
         }
     }
-
     @Async("executor")
     public void createLogs(Long taskId, String date) {
         try {
             Thread.sleep(20000);
-
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             LocalDate logDate = LocalDate.parse(date, formatter);
-
             Path path = Paths.get(LOG_FILE_PATH);
             List<String> logLines = Files.readAllLines(path);
             String formattedDate = logDate.format(formatter);
@@ -179,16 +176,19 @@ public class LogService {
                         "Нет логов за дату: " + date);
             }
 
+            // Безопасное создание временной директории и файла
+            Path tempDir;
             Path logFile;
             if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                logFile = Files.createTempFile("logs-" + formattedDate, ".log");
+                tempDir = Files.createTempDirectory("myapp-logs");
             } else {
                 FileAttribute<Set<PosixFilePermission>> attr =
                         PosixFilePermissions.asFileAttribute(
                                 PosixFilePermissions.fromString("rwx------"));
-                logFile = Files.createTempFile("logs-" + formattedDate, ".log", attr);
+                tempDir = Files.createTempDirectory("myapp-logs", attr);
             }
 
+            logFile = Files.createTempFile(tempDir, "logs-" + formattedDate + "-", ".log");
             Files.write(logFile, currentLogs);
             logFile.toFile().deleteOnExit();
 
@@ -197,6 +197,7 @@ public class LogService {
                 task.setStatus("COMPLETED");
                 task.setFilePath(logFile.toString());
             }
+
         } catch (IOException e) {
             LogObject task = tasks.get(taskId);
             if (task != null) {
@@ -207,6 +208,7 @@ public class LogService {
             Thread.currentThread().interrupt();
         }
     }
+
 
     public Long createLogAsync(String date) {
         Long id = idCounter.getAndIncrement();
