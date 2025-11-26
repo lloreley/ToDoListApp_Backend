@@ -4,15 +4,18 @@ import com.vlad.todo.dto.UserDtoRequest;
 import com.vlad.todo.dto.UserDtoResponse;
 import com.vlad.todo.service.GroupService;
 import com.vlad.todo.service.UserService;
-import org.springframework.security.access.prepost.PreAuthorize;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @CrossOrigin(origins = "http://localhost:8081")
@@ -30,7 +33,6 @@ public class UserController {
         this.groupService = groupService;
     }
 
-    // ---------- ДОСТУПЕН USER и ADMIN ----------
     @GetMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<List<UserDtoResponse>> allUsers() {
@@ -50,8 +52,19 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    // ---------- ДОСТУП ТОЛЬКО ADMIN ----------
+    // ---------- GET CURRENT USER ----------
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<UserDtoResponse> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = userDetails.getUsername();
+        UserDtoResponse user = userService.findByEmail(email);
+        return ResponseEntity.ok(user);
+    }
 
+    // ---------- ДОСТУП ТОЛЬКО ADMIN ----------
     @PostMapping("/saveUser")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDtoResponse> saveUser(@Valid @RequestBody UserDtoRequest userDtoRequest) {
@@ -71,7 +84,7 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(id, userDtoRequest));
     }
 
-    @DeleteMapping("/deleteUser/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable long id) {
         userService.deleteUserById(id);

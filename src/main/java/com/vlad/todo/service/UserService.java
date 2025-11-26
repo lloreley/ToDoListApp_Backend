@@ -9,6 +9,7 @@ import com.vlad.todo.exception.AlreadyExistsException;
 import com.vlad.todo.exception.NotFoundException;
 import com.vlad.todo.mapper.UserMapper;
 import com.vlad.todo.model.Group;
+import com.vlad.todo.model.Role;
 import com.vlad.todo.model.User;
 import com.vlad.todo.repository.GroupRepository;
 import com.vlad.todo.repository.UserRepository;
@@ -35,6 +36,18 @@ public class UserService {
                 user -> usersDtoResponse.add(userMapper.toDto(user)));
         return usersDtoResponse;
     }
+    public UserDtoResponse findByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        return UserDtoResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .phone(user.getPhone())
+                .role(user.getRole().name())
+                .build();
+    }
 
     public UserDtoResponse findById(long id) {
         UserDtoResponse cachedUser = userCache.get(id);
@@ -56,7 +69,6 @@ public class UserService {
         }
         User user = userMapper.toEntity(userDtoRequest);
         userRepository.save(user);
-        userCache.put(user.getId(), userMapper.toDto(user));
         return userMapper.toDto(user);
     }
 
@@ -76,6 +88,10 @@ public class UserService {
         }
         if (userDtoRequest.getFirstName() != null) {
             user.setFirstName(userDtoRequest.getFirstName());
+        }
+        if(userDtoRequest.getRole() != null) {
+            Role role = "ADMIN".equals(userDtoRequest.getRole()) ? Role.ADMIN : Role.USER ;
+            user.setRole(role);
         }
         userRepository.save(user);
         userCache.put(user.getId(), userMapper.toDto(user));
