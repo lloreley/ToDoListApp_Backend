@@ -1,35 +1,51 @@
 package com.vlad.todo.model;
 
+
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import java.util.*;
+
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "users")
 public class User {
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    @Column(name = "first_name", nullable = false, length = 50)
-    private String firstName;
-    @Column(name = "last_name", nullable = false, length = 50)
-    private String lastName;
-    @Column(nullable = false, unique = true, length = 50)
+    private Long id;
+
+
+    @Column(nullable = false, unique = true)
     private String email;
-    @Column(nullable = false, unique = true, length = 15)
+
+
+    @Column(nullable = false)
+    private String password;
+
+
+    @Column(nullable = false)
+    private String firstName;
+
+
+    @Column(nullable = false)
+    private String lastName;
+
+
+    @Column(nullable = false, unique = true)
     private String phone;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Task> tasks = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
-    private List<Group> groups = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role; // USER / ADMIN
+
+
+    @ManyToMany(mappedBy = "users")
+    private Set<Group> groups = new HashSet<>();
 }

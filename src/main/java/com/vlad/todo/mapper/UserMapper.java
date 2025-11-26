@@ -1,37 +1,35 @@
 package com.vlad.todo.mapper;
 
-import com.vlad.todo.dto.TaskDtoRequest;
-import com.vlad.todo.dto.TaskDtoResponse;
-import com.vlad.todo.dto.UserDtoRequest;
-import com.vlad.todo.dto.UserDtoResponse;
-import com.vlad.todo.model.Task;
-import com.vlad.todo.model.User;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AllArgsConstructor;
+
+import com.vlad.todo.dto.*;
+import com.vlad.todo.model.*;
 import org.springframework.stereotype.Component;
 
-@Component
-@AllArgsConstructor
-public class UserMapper {
-    private final TaskMapper taskMapper;
 
-    public User toEntity(UserDtoRequest userDtoRequest) {
-        User user = new User();
-        user.setFirstName(userDtoRequest.getFirstName());
-        user.setLastName(userDtoRequest.getLastName());
-        user.setEmail(userDtoRequest.getEmail());
-        user.setPhone(userDtoRequest.getPhone());
-        return user;
-    }
+@Component
+public class UserMapper {
+
 
     public UserDtoResponse toDto(User user) {
-        UserDtoResponse userDtoResponse = new UserDtoResponse();
-        userDtoResponse.setId(user.getId());
-        userDtoResponse.setEmail(user.getEmail());
-        userDtoResponse.setFirstName(user.getFirstName());
-        userDtoResponse.setLastName(user.getLastName());
-        userDtoResponse.setPhone(user.getPhone());
-        return userDtoResponse;
+        return UserDtoResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .phone(user.getPhone())
+                .role(user.getRole().name())
+                .build();
+    }
+
+
+    public User toEntity(UserDtoRequest dto) {
+        return User.builder()
+                .email(dto.getEmail())
+                .password(dto.getPassword()) // hashed later
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .phone(dto.getPhone())
+                .role(Role.valueOf(dto.getRole()))
+                .build();
     }
 }

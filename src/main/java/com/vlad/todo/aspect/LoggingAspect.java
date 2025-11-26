@@ -8,20 +8,20 @@ import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;    
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
 @Aspect
 @Component
 public class LoggingAspect {
     private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
 
-    @Before("execution(* com.vlad.todo..*(..))")
+    // Исключаем фильтры из проксирования
+    @Before("execution(* com.vlad.todo..*(..)) && !within(com.vlad.todo.security.JwtFilter)")
     public void logBefore(JoinPoint joinPoint) {
         if (logger.isDebugEnabled()) {
             logger.info("Выполняется: {}", joinPoint.getSignature().toShortString());
         }
     }
 
-    @AfterReturning(pointcut = "execution(* com.vlad.todo..*(..))",
+    @AfterReturning(pointcut = "execution(* com.vlad.todo..*(..)) && !within(com.vlad.todo.security.JwtFilter)",
             returning = "result")
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
         if (logger.isDebugEnabled()) {
@@ -30,7 +30,8 @@ public class LoggingAspect {
         }
     }
 
-    @AfterThrowing(pointcut = "execution(* com.vlad.todo..*(..))", throwing = "error")
+    @AfterThrowing(pointcut = "execution(* com.vlad.todo..*(..)) && !within(com.vlad.todo.security.JwtFilter)",
+            throwing = "error")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable error) {
         if (logger.isDebugEnabled()) {
             logger.error("Исключение в: {} с причиной: {}",
