@@ -19,13 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-/**
- * TaskService — сервис управления задачами с проверкой доступа по ролям.
- *
- * Правила:
- * - ADMIN: может смотреть/создавать/изменять/удалять любые задачи.
- * - USER: может смотреть/создавать/изменять/удалять только свои задачи.
- */
 @Service
 @AllArgsConstructor
 @Transactional
@@ -35,8 +28,6 @@ public class TaskService {
     private final TaskMapper taskMapper;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
-
-    /* ---------------------- Вспомогательные методы для доступа ---------------------- */
 
     private Authentication getAuth() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -67,13 +58,6 @@ public class TaskService {
         }
     }
 
-    /* ---------------------- API методы (совместимы с исходным контроллером) ---------------------- */
-
-    /**
-     * Возвращает задачи.
-     * - ADMIN: все задачи.
-     * - USER: только свои задачи.
-     */
     public List<TaskDtoResponse> findAllTasks() {
         List<Task> tasks;
         if (isAdmin()) {
@@ -88,11 +72,6 @@ public class TaskService {
         return dto;
     }
 
-    /**
-     * Возвращает задачи пользователя по userId.
-     * - ADMIN: любой userId.
-     * - USER: только если userId == текущий пользователь.
-     */
     public List<TaskDtoResponse> findTasksByUser(long userId) {
         if (userId < 1) throw new InvalidInputException("Id пользователя должен быть больше 0");
 
@@ -109,11 +88,6 @@ public class TaskService {
         return dto;
     }
 
-    /**
-     * Возвращает задачу по id с проверкой доступа.
-     * - ADMIN: любую задачу.
-     * - USER: только свою.
-     */
     public TaskDtoResponse findTaskById(long id) {
         if (id < 1) throw new InvalidInputException("Id должен быть больше 0");
 
@@ -127,14 +101,8 @@ public class TaskService {
         return taskMapper.toDto(task);
     }
 
-    /**
-     * Создать задачу.
-     * - USER: задача привязывается к текущему пользователю (userId в DTO игнорируется).
-     * - ADMIN: должен передать userId в DTO — сохраняем задачу указанному пользователю.
-     */
     public TaskDtoResponse saveTask(TaskDtoRequest taskDtoRequest) {
         if (isAdmin()) {
-            // ADMIN должен указать корректный userId
             if (taskDtoRequest.getUserId() == null || taskDtoRequest.getUserId() < 1) {
                 throw new InvalidInputException("Для ADMIN нужно указать userId");
             }
@@ -148,7 +116,6 @@ public class TaskService {
             return taskMapper.toDto(task);
 
         } else {
-            // USER: привязать к текущему пользователю
             User current = getCurrentUser();
             Task task = taskMapper.toEntity(taskDtoRequest);
             task.setUser(current);
@@ -157,11 +124,6 @@ public class TaskService {
         }
     }
 
-    /**
-     * Обновить задачу (с проверкой прав).
-     * - USER: может обновлять только свои.
-     * - ADMIN: любую.
-     */
     public TaskDtoResponse updateTask(long id, TaskDtoRequest taskDtoRequest) {
         if (id < 1) throw new InvalidInputException("Id должен быть больше 0");
 
@@ -172,14 +134,12 @@ public class TaskService {
             throw new InvalidInputException("Вы не можете изменять эту задачу");
         }
 
-        // частичное обновление полей
         if (taskDtoRequest.getTitle() != null) task.setTitle(taskDtoRequest.getTitle());
         if (taskDtoRequest.getContent() != null) task.setContent(taskDtoRequest.getContent());
         if (taskDtoRequest.getIsCompleted() != null) task.setIsCompleted(taskDtoRequest.getIsCompleted());
         if (taskDtoRequest.getDeadlineDate() != null) task.setDeadlineDate(taskDtoRequest.getDeadlineDate());
         if (taskDtoRequest.getIsImportant() != null) task.setIsImportant(taskDtoRequest.getIsImportant());
 
-        // ADMIN может поменять владельца — если указан userId и это валидно
         if (isAdmin() && taskDtoRequest.getUserId() != null && taskDtoRequest.getUserId() > 0) {
             User newOwner = userRepository.findById(taskDtoRequest.getUserId())
                     .orElseThrow(() -> new NotFoundException(String.format(USER_WITH_ID_NOT_FOUND, taskDtoRequest.getUserId())));
@@ -190,11 +150,6 @@ public class TaskService {
         return taskMapper.toDto(task);
     }
 
-    /**
-     * Удалить задачу (с проверкой прав).
-     * - USER: только свою.
-     * - ADMIN: любую.
-     */
     public void deleteTaskById(long id) {
         if (id < 1) throw new InvalidInputException("Id должен быть больше 0");
 
@@ -208,11 +163,6 @@ public class TaskService {
         taskRepository.delete(task);
     }
 
-    /* ---------------------- Доп. удобные методы (если где-то используются) ---------------------- */
-
-    /**
-     * Удобный метод для контроллера `/tasks/my` — возвращает задачи текущего пользователя.
-     */
     public List<TaskDtoResponse> findTasksForCurrentUser(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден: " + email));
@@ -222,10 +172,6 @@ public class TaskService {
         return dto;
     }
 
-    /**
-     * Метод с явной сигнатурой "withAccess" для контроллерей, которые ожидали такую сигнатуру.
-     * Делегирует на базовые методы и выполняет те же проверки.
-     */
     public List<TaskDtoResponse> findTasksByUserWithAccess(long userId, String currentUserEmail) {
         User current = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден: " + currentUserEmail));
@@ -245,7 +191,6 @@ public class TaskService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден: " + currentUserEmail));
 
         if (isAdmin()) {
-            // admin должен указать userId в dto
             if (dto.getUserId() == null || dto.getUserId() < 1) {
                 throw new InvalidInputException("Admin должен указать userId");
             }
@@ -256,7 +201,6 @@ public class TaskService {
             taskRepository.save(task);
             return taskMapper.toDto(task);
         } else {
-            // обычный пользователь — привязываем к себе
             Task task = taskMapper.toEntity(dto);
             task.setUser(current);
             taskRepository.save(task);
@@ -265,7 +209,6 @@ public class TaskService {
     }
 
     public TaskDtoResponse updateTaskWithAccess(long id, TaskDtoRequest dto, String currentUserEmail) {
-        // просто делегируем к updateTask (уже делает проверки)
         return updateTask(id, dto);
     }
 

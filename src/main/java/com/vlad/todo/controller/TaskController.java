@@ -38,9 +38,6 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-    // ===============================
-    //      GET ALL TASKS
-    // ===============================
     @Operation(
             summary = "Получить список задач",
             description = """
@@ -65,9 +62,6 @@ public class TaskController {
         return ResponseEntity.ok(tasks);
     }
 
-    // ===============================
-    //      GET USER TASKS
-    // ===============================
     @Operation(
             summary = "Получить задачи пользователя",
             description = """
@@ -84,9 +78,6 @@ public class TaskController {
         return ResponseEntity.ok(taskService.findTasksByUser(userId));
     }
 
-    // ===============================
-    //        CREATE TASK
-    // ===============================
     @Operation(
             summary = "Создать задачу",
             description = """
@@ -103,9 +94,6 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    // ===============================
-    //        UPDATE TASK
-    // ===============================
     @Operation(
             summary = "Обновить задачу",
             description = """
@@ -123,9 +111,6 @@ public class TaskController {
         return ResponseEntity.ok(taskService.updateTask(id, taskDto));
     }
 
-    // ===============================
-    //          GET BY ID
-    // ===============================
     @Operation(
             summary = "Получить задачу по ID",
             description = """
@@ -142,9 +127,6 @@ public class TaskController {
         return ResponseEntity.ok(taskService.findTaskById(id));
     }
 
-    // ===============================
-    //        DELETE TASK
-    // ===============================
     @Operation(
             summary = "Удалить задачу",
             description = """

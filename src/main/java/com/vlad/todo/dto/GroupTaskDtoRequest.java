@@ -29,6 +29,5 @@ public class GroupTaskDtoRequest {
     @NotNull(message = "ID группы обязателен")
     private Long groupId;
 
-    // Может быть null, если задача пока не назначена пользователю
     private Long assignedUserId;
 }

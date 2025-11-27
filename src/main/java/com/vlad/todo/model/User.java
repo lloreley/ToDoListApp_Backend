@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.*;
 
-
 @Entity
 @Getter
 @Setter
@@ -14,7 +13,6 @@ import java.util.*;
 @Builder
 @Table(name = "users")
 public class User {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,6 +2,7 @@ package com.vlad.todo.controller;
 
 import com.vlad.todo.dto.UserDtoRequest;
 import com.vlad.todo.dto.UserDtoResponse;
+import com.vlad.todo.model.Role;
 import com.vlad.todo.service.GroupService;
 import com.vlad.todo.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +54,6 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    // ---------- GET CURRENT USER ----------
     @GetMapping("/me")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<UserDtoResponse> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
@@ -64,7 +65,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // ---------- ДОСТУП ТОЛЬКО ADMIN ----------
     @PostMapping("/saveUser")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDtoResponse> saveUser(@Valid @RequestBody UserDtoRequest userDtoRequest) {
@@ -78,9 +78,16 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDtoResponse> updateUser(@PathVariable long id,
                                                       @RequestBody UserDtoRequest userDtoRequest) {
+
+        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserDtoResponse currentUser = userService.findByEmail(currentEmail);
+
+        if (!currentUser.getRole().equals(Role.ADMIN) && currentUser.getId() != id) {
+            return ResponseEntity.status(403).build();
+        }
+
         return ResponseEntity.ok(userService.updateUser(id, userDtoRequest));
     }
 

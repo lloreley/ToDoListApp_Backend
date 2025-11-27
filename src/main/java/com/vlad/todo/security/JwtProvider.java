@@ -11,10 +11,8 @@ import javax.crypto.SecretKey;
 @Component
 public class JwtProvider {
 
-
     private final SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private final long EXPIRATION = 1000 * 60 * 60; // 1 hour
-
 
     public String generateToken(String email, String role) {
         return Jwts.builder()

@@ -39,14 +39,7 @@ public class UserService {
     public UserDtoResponse findByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-        return UserDtoResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .phone(user.getPhone())
-                .role(user.getRole().name())
-                .build();
+        return userMapper.toDto(user);
     }
 
     public UserDtoResponse findById(long id) {
@@ -92,6 +85,9 @@ public class UserService {
         if(userDtoRequest.getRole() != null) {
             Role role = "ADMIN".equals(userDtoRequest.getRole()) ? Role.ADMIN : Role.USER ;
             user.setRole(role);
+        }
+        if(userDtoRequest.getPassword() != null) {
+            user.setPassword(userMapper.encodePassword(userDtoRequest.getPassword()));
         }
         userRepository.save(user);
         userCache.put(user.getId(), userMapper.toDto(user));

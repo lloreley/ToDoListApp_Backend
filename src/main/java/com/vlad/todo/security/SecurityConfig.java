@@ -53,7 +53,6 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // Настройка CORS для фронтенда
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -24,7 +24,7 @@ public class Task {
     private Boolean isCompleted;
     @Column(name = "is_important", nullable = false)
     private Boolean isImportant;
-    @Column(name = "task_deadline", nullable = false)
+    @Column(name = "task_deadline")
     private LocalDate deadlineDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

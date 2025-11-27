@@ -21,7 +21,9 @@ public class GroupTaskMapper {
         }
         if (task.getAssignedUser() != null) {
             dto.setAssignedUserId(task.getAssignedUser().getId());
+            dto.setAssignedUserName(task.getAssignedUser().getFirstName());
         }
+
 
         return dto;
     }

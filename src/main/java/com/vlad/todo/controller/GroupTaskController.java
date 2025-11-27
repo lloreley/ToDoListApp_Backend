@@ -17,6 +17,7 @@ public class GroupTaskController {
 
     private final GroupTaskService groupTaskService;
 
+
     @PostMapping
     public ResponseEntity<GroupTaskDtoResponse> create(@RequestBody GroupTaskDtoRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(groupTaskService.create(dto));

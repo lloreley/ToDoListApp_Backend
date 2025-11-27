@@ -26,6 +26,5 @@ public class GroupTaskDtoResponse {
 
     private Long assignedUserId;
 
-    // Для удобства отображения имени пользователя
     private String assignedUserName;
 }

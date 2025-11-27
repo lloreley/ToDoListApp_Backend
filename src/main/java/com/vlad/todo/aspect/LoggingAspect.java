@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 public class LoggingAspect {
     private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
 
-    // Исключаем фильтры из проксирования
     @Before("execution(* com.vlad.todo..*(..)) && !within(com.vlad.todo.security.JwtFilter)")
     public void logBefore(JoinPoint joinPoint) {
         if (logger.isDebugEnabled()) {

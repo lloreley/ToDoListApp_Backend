@@ -14,7 +14,6 @@ public class TaskDtoRequest {
     @NotNull(message = "Статус выполнения должен быть указан")
     private Boolean isCompleted;
 
-    @Future(message = "Дедлайн не может быть в прошлом")
     @NotNull(message = "Дата дедлайна должна быть указана")
     private LocalDate deadlineDate;
 

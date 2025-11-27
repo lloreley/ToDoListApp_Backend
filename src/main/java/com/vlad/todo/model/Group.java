@@ -26,7 +26,6 @@ public class Group {
 
     private LocalDate createdDate = LocalDate.now();
 
-    // 🔥 Каскадное удаление связанного списка групповых задач
     @OneToMany(
             mappedBy = "group",
             cascade = CascadeType.ALL,
@@ -41,7 +40,6 @@ public class Group {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> users = new ArrayList<>();
-
 
     public void addUser(User user) {
         if (!users.contains(user)) {

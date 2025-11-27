@@ -30,9 +30,6 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
 
-    // -----------------------------------------------
-    // 🔒 Получаем текущего пользователя
-    // -----------------------------------------------
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
@@ -54,10 +51,6 @@ public class GroupService {
         }
     }
 
-    // ------------------------------------------------------
-    // ADMIN → все группы
-    // USER → только свои
-    // ------------------------------------------------------
     public List<GroupDtoResponse> findAll() {
         User user = getCurrentUser();
 
@@ -72,10 +65,6 @@ public class GroupService {
                 .toList();
     }
 
-    // ------------------------------------------------------
-    // Получить группу по ID
-    // USER → только если состоит в группе
-    // ------------------------------------------------------
     public GroupDtoResponse findById(long id) {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
@@ -86,29 +75,19 @@ public class GroupService {
         return groupMapper.toDto(group);
     }
 
-    // ------------------------------------------------------
-    // Создать группу
-    // ADMIN → может создать для всех
-    // USER → создаёт группу, где сразу является участником
-    // ------------------------------------------------------
     public GroupDtoResponse save(GroupDtoRequest request) {
         User current = getCurrentUser();
 
         Group group = groupMapper.toEntity(request);
 
         if (!isAdmin(current)) {
-            group.addUser(current); // пользователь создаёт группу, становится её владельцем
+            group.addUser(current);
         }
 
         groupRepository.save(group);
         return groupMapper.toDto(group);
     }
 
-    // ------------------------------------------------------
-    // Обновить группу
-    // USER → только если состоит в группе
-    // ADMIN → всегда
-    // ------------------------------------------------------
     public GroupDtoResponse update(long id, GroupDtoRequest request) {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
@@ -127,11 +106,6 @@ public class GroupService {
         return groupMapper.toDto(group);
     }
 
-    // ------------------------------------------------------
-    // Удалить группу
-    // USER → только если состоит в группе
-    // ADMIN → всегда
-    // ------------------------------------------------------
     public void deleteById(long id) {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
@@ -143,11 +117,6 @@ public class GroupService {
         groupRepository.delete(group);
     }
 
-    // ------------------------------------------------------
-    // Добавить пользователя в группу
-    // USER → только в свои группы
-    // ADMIN → всегда
-    // ------------------------------------------------------
     public GroupDtoResponse addUserToGroup(long groupId, long userId) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(
@@ -164,11 +133,6 @@ public class GroupService {
         return groupMapper.toDto(group);
     }
 
-    // ------------------------------------------------------
-    // Удалить пользователя из группы
-    // USER → может удалять только себя
-    // ADMIN → любого
-    // ------------------------------------------------------
     public GroupDtoResponse removeUserFromGroup(long groupId, long userId) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(
@@ -181,7 +145,6 @@ public class GroupService {
         User target = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        // USER может удалить только себя
         if (!isAdmin(current) && !current.getId().equals(userId)) {
             throw new InvalidInputException("Вы можете удалять только себя из группы");
         }

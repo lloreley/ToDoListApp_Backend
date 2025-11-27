@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class GroupTaskService {
@@ -49,7 +49,7 @@ public class GroupTaskService {
         }
 
         User assignedUser = null;
-        if (dto.getAssignedUserId() != null) {
+        if (dto.getAssignedUserId() != null && dto.getAssignedUserId() > 0) {
             assignedUser = userRepository.findById(dto.getAssignedUserId())
                     .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
@@ -84,6 +84,18 @@ public class GroupTaskService {
         if (dto.getIsCompleted() != null) task.setIsCompleted(dto.getIsCompleted());
         if (dto.getIsImportant() != null) task.setIsImportant(dto.getIsImportant());
         if (dto.getDeadlineDate() != null) task.setDeadlineDate(dto.getDeadlineDate());
+        if (dto.getAssignedUserId() != null) {
+
+            if (dto.getAssignedUserId() == -1)
+                task.setAssignedUser(null);
+            else {
+                User temp = userRepository.findById(dto.getAssignedUserId())
+                        .orElseThrow(() -> new NotFoundException(
+                                String.format("Пользователь с таким ID не найден", id)));
+                task.setAssignedUser(temp);
+            }
+
+        }
 
         return mapper.toDto(groupTaskRepository.save(task));
     }

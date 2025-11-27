@@ -14,6 +14,10 @@ public class UserMapper {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
 
     public UserDtoResponse toDto(User user) {
         return UserDtoResponse.builder()
@@ -29,7 +33,7 @@ public class UserMapper {
     public User toEntity(UserDtoRequest dto) {
         return User.builder()
                 .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
+                .password(encodePassword(dto.getPassword()))
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
                 .phone(dto.getPhone())

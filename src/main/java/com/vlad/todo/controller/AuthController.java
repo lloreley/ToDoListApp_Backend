@@ -1,6 +1,5 @@
 package com.vlad.todo.controller;
 
-
 import com.vlad.todo.dto.*;
 import com.vlad.todo.model.User;
 import com.vlad.todo.repository.UserRepository;
@@ -12,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
 
 @RestController
 @CrossOrigin(origins = "http://localhost:8081")
@@ -32,12 +30,10 @@ public class AuthController {
         return Map.of("message", ex.getMessage());
     }
 
-
     @PostMapping("/register")
     public UserDtoResponse register(@RequestBody UserDtoRequest userDtoRequest) {
         return userService.save(userDtoRequest);
     }
-
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody AuthRequest request) {
